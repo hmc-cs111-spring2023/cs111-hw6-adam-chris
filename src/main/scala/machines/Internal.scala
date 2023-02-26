@@ -18,7 +18,7 @@ extension (l1 : RegularLanguage)
     def <+> : RegularLanguage = Concat(l1, Star(l1))
     
     def apply (n : Int) : RegularLanguage = { 
-        if (n <= 0) Empty 
+        if (n <= 0) Epsilon 
         else Concat(l1, l1{n-1}) }
     
     // {
