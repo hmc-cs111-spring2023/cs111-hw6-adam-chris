@@ -3,13 +3,14 @@ package machines
 import regex._
 import dfa._
 
-// TODO: Add your code below
-
 given Conversion[Char, RegularLanguage] =
     c => Character(c)
 
 given Conversion[String, RegularLanguage] = 
     s => s.map(c => Character(c)).reduce(Concat(_,_))
+
+given Conversion[RegularLanguage, DFA] =
+    l => regexToDFA(l, findCharacters(l))
 
 extension (l1 : RegularLanguage)
     def ||(l2 : RegularLanguage) : RegularLanguage = Union(l1,l2)
@@ -20,12 +21,13 @@ extension (l1 : RegularLanguage)
     def apply (n : Int) : RegularLanguage = { 
         if (n <= 0) Epsilon 
         else Concat(l1, l1{n-1}) }
-    
-    // {
-    //     var output = Empty
-    //     var b = n
-    //     while(b > 0) {
-    //         output = Concat(output, l1) 
-    //         b = b-1
-    //     } output
-    // }
+
+    def toDFA (using a : Set[Char]) : DFA = regexToDFA(l1, a)
+
+def findCharacters(l: RegularLanguage) : Set[Char]  = l match
+    case Empty => Set() 
+    case Epsilon => Set() 
+    case Character(c) => Set(c)
+    case Union(l1, l2) => findCharacters(l1) | findCharacters(l2)
+    case Concat(l1, l2) => findCharacters(l1) | findCharacters(l2)
+    case Star(l1) => findCharacters(l1)
